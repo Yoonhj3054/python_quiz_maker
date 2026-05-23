@@ -1,6 +1,7 @@
 import json
 import random
 import re
+import os
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, session, redirect
@@ -52,10 +53,21 @@ def get_random_question_by_level(level):
         pool = ALL_QUESTIONS
     return random.choice(pool)
 
-# Mock DB (In-memory for prototype)
-users = {}
-user_history = {}
-ranking_board = [] # NEW: Game Ranking Board
+DB_PATH = 'data/db.json'
+
+def get_db():
+    if not os.path.exists(DB_PATH):
+        return {'users': {}, 'user_history': {}, 'ranking_board': []}
+    try:
+        with open(DB_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return {'users': {}, 'user_history': {}, 'ranking_board': []}
+
+def save_db(db):
+    os.makedirs('data', exist_ok=True)
+    with open(DB_PATH, 'w', encoding='utf-8') as f:
+        json.dump(db, f, ensure_ascii=False, indent=2)
 
 def login_required(f):
     @wraps(f)
@@ -79,18 +91,23 @@ def login():
         if not user_id or not password:
             return render_template('auth.html', error='아이디와 비밀번호를 모두 입력해주세요.', is_login=(action=='login'))
 
+        db = get_db()
+
         if action == 'signup':
             if len(password) < 8:
                 return render_template('auth.html', error='비밀번호는 8자리 이상이어야 합니다.', is_login=False)
-            if user_id in users:
+            if user_id in db['users']:
                 return render_template('auth.html', error='이미 존재하는 아이디입니다.', is_login=False)
-            users[user_id] = password
+            db['users'][user_id] = password
+            if user_id not in db['user_history']:
+                db['user_history'][user_id] = []
+            save_db(db)
             session['username'] = user_id
             return redirect('/')
         else: # login
-            if user_id not in users:
+            if user_id not in db['users']:
                 return render_template('auth.html', error='없는 아이디입니다.', is_login=True)
-            if users[user_id] != password:
+            if db['users'][user_id] != password:
                 return render_template('auth.html', error='비밀번호가 틀렸습니다.', is_login=True)
                 
             session['username'] = user_id
@@ -269,15 +286,17 @@ def results():
     # Save to history
     username = session.get('username')
     if username and not session.get('results_saved'):
-        if username not in user_history:
-            user_history[username] = []
-        user_history[username].append({
+        db = get_db()
+        if username not in db['user_history']:
+            db['user_history'][username] = []
+        db['user_history'][username].append({
             'mode': mode,
             'score': score,
             'total': total,
             'correct': correct_count,
             'date': datetime.now().strftime("%Y-%m-%d %H:%M")
         })
+        save_db(db)
         session['results_saved'] = True
     
     return render_template('results.html', score=score, total=total, correct=correct_count, incorrect=incorrect, weakness=weakness, mode=mode)
@@ -285,14 +304,16 @@ def results():
 @app.route('/profile')
 @login_required
 def profile():
-    history = user_history.get(session.get('username'), [])
-    return render_template('profile.html', history=history)
+    db = get_db()
+    history = db['user_history'].get(session.get('username'), [])
+    return render_template('profile.html', history=list(reversed(history)))
 
 @app.route('/game')
 @login_required
 def game():
     # Sort ranking board
-    ranked = sorted(ranking_board, key=lambda x: x['score'], reverse=True)
+    db = get_db()
+    ranked = sorted(db['ranking_board'], key=lambda x: x['score'], reverse=True)
     return render_template('game.html', ranking=ranked)
 
 @app.route('/game_start')
@@ -319,6 +340,11 @@ def game_active():
         
     q_id = session.get('g_current_q_id')
     current_q = Q_DICT.get(q_id)
+    
+    # Bug Fix: If the cookie holds an old/deleted question ID, pick a new one
+    if current_q is None:
+        current_q = get_random_question_by_level(session.get('g_level', 1))
+        session['g_current_q_id'] = current_q['id']
     
     message = None
     msg_type = None
@@ -371,11 +397,13 @@ def game_active():
                 
                 if session['g_hp'] <= 0:
                     # Game Over -> register ranking
-                    ranking_board.append({
+                    db = get_db()
+                    db['ranking_board'].append({
                         'name': session['username'],
                         'score': session['g_score'],
                         'level': session['g_level']
                     })
+                    save_db(db)
                     return redirect('/game_over')
             
             # Next question
