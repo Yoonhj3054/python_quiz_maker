@@ -31,6 +31,27 @@ except Exception as e:
     Q_DICT = {}
     print(f"Failed to load questions: {e}")
 
+Q_BY_DIFF = {
+    '초급': [q for q in ALL_QUESTIONS if q['difficulty'] == '초급'],
+    '중급': [q for q in ALL_QUESTIONS if q['difficulty'] == '중급'],
+    '고급': [q for q in ALL_QUESTIONS if q['difficulty'] == '고급'],
+    '최상': [q for q in ALL_QUESTIONS if q['difficulty'] == '최상']
+}
+
+def get_random_question_by_level(level):
+    if level <= 2:
+        pool = Q_BY_DIFF.get('초급', ALL_QUESTIONS)
+    elif level <= 4:
+        pool = Q_BY_DIFF.get('중급', ALL_QUESTIONS)
+    elif level <= 7:
+        pool = Q_BY_DIFF.get('고급', ALL_QUESTIONS)
+    else:
+        pool = Q_BY_DIFF.get('최상', ALL_QUESTIONS)
+        
+    if not pool:
+        pool = ALL_QUESTIONS
+    return random.choice(pool)
+
 # Mock DB (In-memory for prototype)
 users = {}
 user_history = {}
@@ -285,8 +306,8 @@ def game_start():
     session['g_combo'] = 0
     session['g_achievements'] = []
     
-    # Pick first random question
-    session['g_current_q_id'] = random.choice(ALL_QUESTIONS)['id']
+    # Pick first random question based on Level 1
+    session['g_current_q_id'] = get_random_question_by_level(1)['id']
     
     return redirect('/game_active')
 
@@ -358,7 +379,7 @@ def game_active():
                     return redirect('/game_over')
             
             # Next question
-            next_q = random.choice(ALL_QUESTIONS)
+            next_q = get_random_question_by_level(session['g_level'])
             session['g_current_q_id'] = next_q['id']
             current_q = next_q
             
