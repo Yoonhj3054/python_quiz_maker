@@ -1,70 +1,78 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="game-hud" style="display: flex; justify-content: space-between; background: var(--bg-color); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-    <div>
-        <span style="font-size: 1.5rem; font-weight: bold; color: #ff4757;">
-            {% for _ in range(hp) %}❤️{% endfor %}
-            {% for _ in range(3 - hp) %}🖤{% endfor %}
-        </span>
-    </div>
-    <div style="text-align: center;">
-        <div style="font-size: 1.2rem; font-weight: bold;">Lv.{{ level }}</div>
-        <div style="width: 200px; background: #dfe4ea; border-radius: 10px; height: 10px; margin-top: 5px; overflow: hidden;">
-            <div style="width: {{ (exp / max_exp) * 100 }}%; background: var(--primary-color); height: 100%; transition: width 0.3s;"></div>
+<div class="game-container" style="position: relative; max-width: 1000px; margin: 0 auto; padding-top: 1rem;">
+    
+    <!-- 우측 상단 큰 HUD (상태창) -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem;">
+        <div style="background: var(--bg-color); padding: 1.5rem 2.5rem; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border: 2px solid var(--border-color); text-align: right; min-width: 250px;">
+            <div style="font-size: 2.2rem; color: #ff4757; margin-bottom: 10px;">
+                {% for _ in range(hp) %}❤️{% endfor %}
+                {% for _ in range(3 - hp) %}🖤{% endfor %}
+            </div>
+            <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px;">Lv.{{ level }}</div>
+            <div style="width: 100%; max-width: 250px; background: #dfe4ea; border-radius: 10px; height: 15px; overflow: hidden; margin-bottom: 5px; margin-left: auto;">
+                <div style="width: {{ (exp / max_exp) * 100 }}%; background: var(--primary-color); height: 100%; transition: width 0.3s;"></div>
+            </div>
+            <div style="font-size: 1rem; color: var(--text-color); margin-bottom: 10px;">{{ exp }} / {{ max_exp }} EXP</div>
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary-color);">점수: {{ score }}</div>
+            {% if combo > 0 %}
+            <div style="font-size: 1.5rem; font-weight: bold; color: #ff7f50; animation: pulse 1s infinite; margin-top: 5px;">🔥 {{ combo }} 콤보!</div>
+            {% endif %}
         </div>
-        <div style="font-size: 0.8rem; color: var(--text-color); margin-top: 2px;">{{ exp }} / {{ max_exp }} EXP</div>
     </div>
-    <div style="text-align: right;">
-        <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">점수: {{ score }}</div>
-        {% if combo > 0 %}
-        <div style="font-size: 1.2rem; font-weight: bold; color: #ff7f50; animation: pulse 1s infinite;">🔥 {{ combo }} 콤보!</div>
+
+    <!-- 메시지 및 업적 알림 -->
+    {% if message %}
+    <div class="card" style="text-align: center; background: {% if msg_type == 'success' %}#e8f8f5{% else %}#fadbd8{% endif %}; border: 1px solid {% if msg_type == 'success' %}#1abc9c{% else %}#e74c3c{% endif %}; padding: 1.5rem; margin-bottom: 2rem; border-radius: 15px;">
+        <h2 style="color: {% if msg_type == 'success' %}#1abc9c{% else %}#e74c3c{% endif %}; margin: 0;">{{ message }}</h2>
+        {% if new_achievements %}
+            <div style="margin-top: 15px;">
+                {% for ach in new_achievements %}
+                    <span style="background: gold; color: #000; padding: 8px 15px; border-radius: 20px; font-weight: bold; margin: 0 5px; font-size: 1.1rem;">🏆 업적 달성: {{ ach }}</span>
+                {% endfor %}
+            </div>
         {% endif %}
     </div>
-</div>
-
-{% if message %}
-<div class="card" style="text-align: center; background: {% if msg_type == 'success' %}#e8f8f5{% else %}#fadbd8{% endif %}; border: 1px solid {% if msg_type == 'success' %}#1abc9c{% else %}#e74c3c{% endif %}; padding: 1rem; margin-bottom: 1rem;">
-    <h3 style="color: {% if msg_type == 'success' %}#1abc9c{% else %}#e74c3c{% endif %}; margin: 0;">{{ message }}</h3>
-    {% if new_achievements %}
-        <div style="margin-top: 10px;">
-            {% for ach in new_achievements %}
-                <span style="background: gold; color: #000; padding: 5px 10px; border-radius: 20px; font-weight: bold; margin: 0 5px;">🏆 업적 달성: {{ ach }}</span>
-            {% endfor %}
-        </div>
-    {% endif %}
-</div>
-{% endif %}
-
-<div class="card">
-    <div class="question-header">
-        <span class="difficulty-badge {{ q.difficulty }}">{{ q.difficulty }}</span>
-        <span style="margin-left: 10px; font-weight: bold; color: var(--text-color);">{{ q.topic }}</span>
-    </div>
-    
-    <div class="question-text" style="font-size: 1.5rem; margin: 1.5rem 0;">
-        {{ q.question }}
-    </div>
-
-    {% if q.codeSnippet %}
-    <div class="code-block">
-        <pre><code class="language-python">{{ q.codeSnippet }}</code></pre>
-    </div>
     {% endif %}
 
-    <form method="POST" action="/game_active">
-        <div class="options-container">
-            {% for option in q.options %}
-            <label class="option-label">
-                <input type="radio" name="option" value="{{ loop.index0 }}" required>
-                <span>{{ option }}</span>
-            </label>
-            {% endfor %}
+    <!-- 문제 및 선지 (중앙 정렬 및 크게) -->
+    <div class="card" style="padding: 4rem 2rem; text-align: center; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+        <div style="margin-bottom: 2rem;">
+            <span class="difficulty-badge {{ q.difficulty }}" style="font-size: 1.2rem; padding: 5px 15px;">{{ q.difficulty }}</span>
+            <span style="margin-left: 10px; font-weight: bold; color: var(--text-color); font-size: 1.2rem;">{{ q.topic }}</span>
         </div>
-        <div style="text-align: center; margin-top: 2rem;">
-            <button type="submit" class="btn" style="padding: 1rem 3rem; font-size: 1.2rem;">정답 제출</button>
+        
+        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 2.5rem; word-break: keep-all; line-height: 1.4;">
+            {{ q.question }}
         </div>
-    </form>
+
+        {% if q.codeSnippet %}
+        <div style="text-align: left; font-size: 1.4rem; margin-bottom: 3rem; background: #1e1e1e; padding: 1.5rem; border-radius: 10px;">
+            <pre style="margin: 0;"><code class="language-python" style="color: #d4d4d4;">{{ q.codeSnippet }}</code></pre>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/game_active">
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+                {% for option in q.options %}
+                <label style="width: 100%; max-width: 600px; padding: 1.5rem 2rem; font-size: 1.5rem; border: 3px solid var(--border-color); border-radius: 15px; cursor: pointer; transition: all 0.2s; background: var(--bg-color); color: var(--text-color); font-weight: bold;" 
+                       onmouseover="this.style.borderColor='var(--primary-color)';" 
+                       onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='var(--border-color)';">
+                    <input type="radio" name="option" value="{{ loop.index0 }}" required style="display: none;" onchange="
+                        let labels = this.closest('form').querySelectorAll('label');
+                        labels.forEach(l => l.style.borderColor = 'var(--border-color)');
+                        this.closest('label').style.borderColor = 'var(--primary-color)';
+                    ">
+                    <span>{{ option }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            <div style="text-align: center; margin-top: 3rem;">
+                <button type="submit" class="btn" style="padding: 1.2rem 4rem; font-size: 1.5rem; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">정답 제출</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <style>
