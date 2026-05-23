@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass fade-in" style="padding: 3rem; max-width: 500px;">
+    <h2 class="text-center" style="margin-bottom: 2.5rem; font-size: 2rem; font-weight: 700;">파이썬 퀴즈 설정</h2>
+    
+    <form method="POST" action="/quiz_config">
+        <div style="margin-bottom: 2.5rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--text-sub);">난이도 선택</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <label class="btn btn-outline text-center" style="padding: 1rem; cursor: pointer;">
+                    <input type="radio" name="difficulty" value="초급" checked style="display:none;" onchange="updateRadio(this)"> 초급
+                </label>
+                <label class="btn btn-outline text-center" style="padding: 1rem; cursor: pointer;">
+                    <input type="radio" name="difficulty" value="중급" style="display:none;" onchange="updateRadio(this)"> 중급
+                </label>
+                <label class="btn btn-outline text-center" style="padding: 1rem; cursor: pointer;">
+                    <input type="radio" name="difficulty" value="고급" style="display:none;" onchange="updateRadio(this)"> 고급
+                </label>
+                <label class="btn btn-outline text-center" style="padding: 1rem; cursor: pointer;">
+                    <input type="radio" name="difficulty" value="최상" style="display:none;" onchange="updateRadio(this)"> 최상
+                </label>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 3rem;">
+            <h3 style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--text-sub);">
+                <span>문제 수</span>
+                <span style="color: var(--accent-primary); font-weight: bold;" id="countDisplay">10개</span>
+            </h3>
+            <input type="range" name="count" min="5" max="30" step="5" value="10" oninput="document.getElementById('countDisplay').innerText = this.value + '개'">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub);">
+                <span>5개</span><span>30개</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <a href="/" class="btn btn-outline" style="flex: 1;">뒤로가기</a>
+            <button type="submit" class="btn btn-primary" style="flex: 2;">퀴즈 시작</button>
+        </div>
+    </form>
+</div>
+<script>
+function updateRadio(el) {
+    document.querySelectorAll('input[name="difficulty"]').forEach(rb => {
+        rb.parentElement.classList.remove('active');
+    });
+    el.parentElement.classList.add('active');
+}
+document.querySelector('input[value="초급"]').parentElement.classList.add('active');
+</script>
+{% endblock %}

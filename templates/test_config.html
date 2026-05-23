@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass fade-in" style="padding: 3rem; max-width: 500px;">
+    <h2 class="text-center" style="margin-bottom: 1rem; font-size: 2.2rem; font-weight: 700;">파이썬 실력 시험</h2>
+    <p class="text-center" style="color: var(--text-sub); margin-bottom: 2.5rem; line-height: 1.5;">
+        실제 시험처럼 제한 시간 내에 문제를 풀어보세요! <br>총 100점 만점입니다.
+    </p>
+    
+    <form method="POST" action="/test_config">
+        <div style="margin-bottom: 2.5rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--text-sub);">시험 수준 선택</h3>
+            <div style="display: flex; gap: 1rem;">
+                <label class="btn btn-outline text-center" style="flex: 1; padding: 1rem; cursor: pointer;">
+                    <input type="radio" name="level" value="초급" checked style="display:none;" onchange="updateTestRadio(this, 20, '초급 문제 비중이 높습니다. 총 20문제.')"> 초급 시험
+                </label>
+                <label class="btn btn-outline text-center" style="flex: 1; padding: 1rem; cursor: pointer;">
+                    <input type="radio" name="level" value="중급" style="display:none;" onchange="updateTestRadio(this, 30, '중급/고급 문제 비중이 높습니다. 총 20문제.')"> 중급 시험
+                </label>
+                <label class="btn btn-outline text-center" style="flex: 1; padding: 1rem; cursor: pointer;">
+                    <input type="radio" name="level" value="고급" style="display:none;" onchange="updateTestRadio(this, 40, '고급/최상 문제 비중이 높습니다. 총 20문제.')"> 고급 시험
+                </label>
+            </div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; margin-bottom: 3rem; border: 1px solid var(--glass-border);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem; align-items: center;">
+                <span style="color: var(--text-sub);">제한 시간</span>
+                <span style="font-weight: bold; color: #f59e0b; font-size: 1.4rem;" id="timeDisplay">20분</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--text-sub);">설명</span>
+                <span style="text-align: right; font-size: 0.95rem;" id="descDisplay">초급 문제 비중이 높습니다. 총 20문제.</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <a href="/" class="btn btn-outline" style="flex: 1;">뒤로가기</a>
+            <button type="submit" class="btn btn-test" style="flex: 2;">시험 시작</button>
+        </div>
+    </form>
+</div>
+<script>
+function updateTestRadio(el, time, desc) {
+    document.querySelectorAll('input[name="level"]').forEach(rb => {
+        rb.parentElement.classList.remove('active');
+    });
+    el.parentElement.classList.add('active');
+    document.getElementById('timeDisplay').innerText = time + '분';
+    document.getElementById('descDisplay').innerText = desc;
+}
+document.querySelector('input[value="초급"]').parentElement.classList.add('active');
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Quiz & Game Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="logo-area">
+                <a href="/" style="display:flex; align-items:center; gap:1rem; text-decoration:none; color:inherit;">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                    <h1>Python Portal</h1>
+                </a>
+            </div>
+            <div class="auth-area">
+                {% if session.get('username') %}
+                    <span class="welcome-text">{{ session.username }}님 환영합니다!</span>
+                    <a href="/profile" class="btn btn-outline" style="border: none; padding: 0.5rem;">내 프로필</a>
+                    <a href="/logout" class="btn btn-outline" style="padding: 0.5rem 1rem;">로그아웃</a>
+                {% else %}
+                    <a href="/login" class="btn btn-outline">로그인 / 회원가입</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

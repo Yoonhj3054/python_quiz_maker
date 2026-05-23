@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass fade-in text-center" style="padding: 3.5rem;">
+    <h2 style="font-size: 2.5rem; margin-bottom: 3rem; font-weight: 700;">무엇을 하시겠습니까?</h2>
+    
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <a href="/quiz_config" class="btn btn-primary" style="padding: 1.5rem; font-size: 1.25rem;">
+            📚 파이썬 퀴즈 풀기
+        </a>
+        <a href="/test_config" class="btn btn-test" style="padding: 1.5rem; font-size: 1.25rem;">
+            ⏱️ 파이썬 실력 시험 (20문제)
+        </a>
+        <a href="/game" class="btn btn-outline" style="padding: 1.5rem; font-size: 1.25rem;">
+            🎮 파이썬 미니 게임
+        </a>
+    </div>
+</div>
+{% endblock %}

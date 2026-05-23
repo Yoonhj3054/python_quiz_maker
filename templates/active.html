@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass fade-in" style="width: 100%; max-width: 800px; padding: 2.5rem;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--glass-border);">
+        <div>
+            <span style="font-size: 1.2rem; font-weight: bold;">
+                {% if mode == 'test' %}📝 시험 진행중{% else %}📚 퀴즈 진행중{% endif %}
+            </span>
+            <span style="margin-left: 1rem; color: var(--text-sub);">{{ idx + 1 }} / {{ total }}</span>
+        </div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            {% if mode == 'test' and time_limit %}
+            <div id="timer" style="background: rgba(0,0,0,0.2); color: #f59e0b; padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold; font-size: 1.2rem; border: 1px solid rgba(255,255,255,0.1);">
+                ⏳ <span id="timeText">{{ time_limit }}:00</span>
+            </div>
+            {% endif %}
+            <a href="/" class="btn btn-outline" style="padding: 0.5rem 1rem;">중단하기</a>
+        </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-bottom: 2.5rem; overflow: hidden;">
+        <div style="height: 100%; background: {% if mode == 'test' %}#f59e0b{% else %}var(--accent-primary){% endif %}; width: {{ (idx / total) * 100 }}%;"></div>
+    </div>
+
+    <!-- Question -->
+    <div style="margin-bottom: 2rem;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+            <span style="font-size: 0.85rem; padding: 0.3rem 0.6rem; background: rgba(255,255,255,0.1); border-radius: 6px;">{{ q.difficulty }}</span>
+            <span style="font-size: 0.85rem; padding: 0.3rem 0.6rem; background: rgba(59,130,246,0.2); color: var(--accent-primary); border-radius: 6px;">{{ q.topic }}</span>
+        </div>
+        <h3 style="font-size: 1.4rem; line-height: 1.6; margin-bottom: 1.5rem; white-space: pre-wrap;">{{ q.question }}</h3>
+        {% if q.codeSnippet %}
+        <pre><code>{{ q.codeSnippet }}</code></pre>
+        {% endif %}
+    </div>
+
+    <!-- Form -->
+    <form id="quizForm" method="POST" action="/active">
+        <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 3rem;">
+            {% for opt in q.options %}
+            <label class="option-box" onclick="selectOption(this)">
+                <input type="radio" name="option" value="{{ loop.index0 }}" required>
+                <div class="option-num">{{ loop.index }}</div>
+                <span style="word-break: break-word;">{{ opt }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        
+        <input type="hidden" name="time_up" id="timeUpInput" value="false">
+
+        <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn {% if mode == 'test' %}btn-test{% else %}btn-primary{% endif %}" id="submitBtn" disabled>
+                {% if idx + 1 == total %}최종 결과 제출{% else %}다음 문제 ➔{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function selectOption(el) {
+    document.querySelectorAll('.option-box').forEach(ob => ob.classList.remove('selected', 'selected-test'));
+    {% if mode == 'test' %}
+    el.classList.add('selected-test');
+    {% else %}
+    el.classList.add('selected');
+    {% endif %}
+    document.getElementById('submitBtn').disabled = false;
+}
+
+{% if mode == 'test' and time_limit %}
+let timeLeft = sessionStorage.getItem('timeLeft');
+if (!timeLeft || {{ idx }} === 0) { 
+    timeLeft = {{ time_limit * 60 }};
+} else {
+    timeLeft = parseInt(timeLeft);
+}
+
+const timerEl = document.getElementById('timeText');
+const timerContainer = document.getElementById('timer');
+const timeUpInput = document.getElementById('timeUpInput');
+
+function updateTimer() {
+    if (timeLeft <= 0) {
+        sessionStorage.removeItem('timeLeft');
+        timeUpInput.value = 'true';
+        document.getElementById('quizForm').submit();
+        return;
+    }
+    
+    let m = Math.floor(timeLeft / 60);
+    let s = timeLeft % 60;
+    timerEl.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    
+    if (timeLeft < 60) {
+        timerContainer.style.color = 'var(--error)';
+        timerContainer.style.borderColor = 'var(--error)';
+        timerContainer.style.background = 'rgba(239, 68, 68, 0.2)';
+    }
+    
+    timeLeft--;
+    sessionStorage.setItem('timeLeft', timeLeft.toString());
+}
+
+setInterval(updateTimer, 1000);
+updateTimer();
+{% endif %}
+</script>
+{% endblock %}
