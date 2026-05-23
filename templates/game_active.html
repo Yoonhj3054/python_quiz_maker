@@ -70,7 +70,7 @@
             <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
                 {% for option in q.options %}
                 <label class="game-option" onclick="selectOption(this)">
-                    <input type="radio" name="option" value="{{ loop.index0 }}" required style="display: none;">
+                    <input type="radio" name="option" value="{{ loop.index0 }}" required style="position: absolute; opacity: 0; pointer-events: none;">
                     <div style="display: flex; align-items: center; text-align: left;">
                         <div class="checkbox-square"></div>
                         <span>{{ option }}</span>

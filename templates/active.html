@@ -41,7 +41,7 @@
         <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 3rem;">
             {% for opt in q.options %}
             <label class="option-box" onclick="selectOption(this)">
-                <input type="radio" name="option" value="{{ loop.index0 }}" required>
+                <input type="radio" name="option" value="{{ loop.index0 }}" required style="position: absolute; opacity: 0; pointer-events: none;">
                 <div class="option-num">{{ loop.index }}</div>
                 <span style="word-break: break-word;">{{ opt }}</span>
             </label>
