@@ -1,8 +1,27 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="glass fade-in text-center" style="padding: 3rem;">
-    <h2 style="font-size: 2rem; margin-bottom: 1rem;">🎮 파이썬 미니 게임</h2>
-    <p style="color: var(--text-sub); margin-bottom: 2rem;">해당 기능은 추후 업데이트 될 예정입니다!</p>
-    <a href="/" class="btn btn-primary">메인으로 돌아가기</a>
+<div class="card">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1>🔥 서바이벌 게임 모드</h1>
+        <p>목숨 3개를 가지고 방대한 파이썬 문제에 도전하세요!</p>
+        <p>콤보를 이어가며 경험치를 쌓고 레벨을 올려 명예의 전당에 이름을 올리세요.</p>
+        <a href="/game_start" class="btn" style="margin-top: 1rem; font-size: 1.2rem; padding: 1rem 3rem;">게임 시작</a>
+    </div>
+
+    <h2>🏆 명예의 전당 (랭킹보드)</h2>
+    {% if ranking %}
+        <div class="stats-grid">
+            {% for p in ranking[:10] %}
+            <div class="stat-card" style="background: var(--bg-color); border: 2px solid {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}#cd7f32{% else %}var(--border-color){% endif %};">
+                <h3>{{ loop.index }}위: {{ p.name }}</h3>
+                <p style="font-size: 1.5rem; color: var(--primary-color);"><strong>{{ p.score }}점</strong></p>
+                <p style="font-size: 0.9rem; color: var(--text-color);">도달 레벨: Lv.{{ p.level }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; margin-top: 2rem; color: var(--text-color);">아직 랭킹에 등록된 유저가 없습니다. 첫 번째 챔피언이 되어보세요!</p>
+    {% endif %}
 </div>
 {% endblock %}

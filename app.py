@@ -34,6 +34,7 @@ except Exception as e:
 # Mock DB (In-memory for prototype)
 users = {}
 user_history = {}
+ranking_board = [] # NEW: Game Ranking Board
 
 def login_required(f):
     @wraps(f)
@@ -269,7 +270,128 @@ def profile():
 @app.route('/game')
 @login_required
 def game():
-    return render_template('game.html')
+    # Sort ranking board
+    ranked = sorted(ranking_board, key=lambda x: x['score'], reverse=True)
+    return render_template('game.html', ranking=ranked)
+
+@app.route('/game_start')
+@login_required
+def game_start():
+    # Initialize game state
+    session['g_hp'] = 3
+    session['g_score'] = 0
+    session['g_exp'] = 0
+    session['g_level'] = 1
+    session['g_combo'] = 0
+    session['g_achievements'] = []
+    
+    # Pick random question pool for survival (endless until HP=0)
+    pool = [q['id'] for q in ALL_QUESTIONS]
+    random.shuffle(pool)
+    session['g_pool'] = pool
+    session['g_idx'] = 0
+    
+    return redirect('/game_active')
+
+@app.route('/game_active', methods=['GET', 'POST'])
+@login_required
+def game_active():
+    if 'g_hp' not in session or session['g_hp'] <= 0:
+        return redirect('/game')
+        
+    idx = session['g_idx']
+    q_id = session['g_pool'][idx]
+    current_q = Q_DICT.get(q_id)
+    
+    message = None
+    msg_type = None
+    level_up = False
+    new_achievements = []
+
+    if request.method == 'POST':
+        selected_option = request.form.get('option')
+        if selected_option is not None:
+            selected_option = int(selected_option)
+            is_correct = (selected_option == current_q['correctAnswer'])
+            
+            if is_correct:
+                session['g_combo'] += 1
+                combo_bonus = session['g_combo'] * 2
+                session['g_score'] += (10 + combo_bonus)
+                session['g_exp'] += 20
+                
+                message = f"정답입니다! 콤보 x{session['g_combo']} (+{10+combo_bonus}점)"
+                msg_type = "success"
+                
+                # Check level up
+                if session['g_exp'] >= session['g_level'] * 100:
+                    session['g_level'] += 1
+                    session['g_exp'] = 0
+                    level_up = True
+                    message += f" 🆙 레벨업! (Lv.{session['g_level']})"
+                
+                # Check achievements
+                achs = set(session['g_achievements'])
+                if session['g_combo'] >= 3 and "콤보 초보자" not in achs:
+                    achs.add("콤보 초보자")
+                    new_achievements.append("콤보 초보자")
+                if session['g_combo'] >= 10 and "콤보 마스터" not in achs:
+                    achs.add("콤보 마스터")
+                    new_achievements.append("콤보 마스터")
+                if session['g_level'] >= 5 and "Python 견습생" not in achs:
+                    achs.add("Python 견습생")
+                    new_achievements.append("Python 견습생")
+                if session['g_level'] >= 10 and "Python 마스터" not in achs:
+                    achs.add("Python 마스터")
+                    new_achievements.append("Python 마스터")
+                session['g_achievements'] = list(achs)
+                
+            else:
+                session['g_hp'] -= 1
+                session['g_combo'] = 0
+                message = f"오답입니다! 목숨이 1 깎였습니다. (정답: {current_q['options'][current_q['correctAnswer']]})"
+                msg_type = "error"
+                
+                if session['g_hp'] <= 0:
+                    # Game Over -> register ranking
+                    ranking_board.append({
+                        'name': session['username'],
+                        'score': session['g_score'],
+                        'level': session['g_level']
+                    })
+                    return redirect('/game_over')
+            
+            # Next question
+            session['g_idx'] += 1
+            if session['g_idx'] >= len(session['g_pool']):
+                pool = [q['id'] for q in ALL_QUESTIONS]
+                random.shuffle(pool)
+                session['g_pool'] = pool
+                session['g_idx'] = 0
+            
+            idx = session['g_idx']
+            current_q = Q_DICT.get(session['g_pool'][idx])
+            
+    return render_template('game_active.html', 
+                          q=current_q, 
+                          hp=session['g_hp'],
+                          score=session['g_score'],
+                          exp=session['g_exp'],
+                          level=session['g_level'],
+                          combo=session['g_combo'],
+                          max_exp=session['g_level'] * 100,
+                          message=message,
+                          msg_type=msg_type,
+                          level_up=level_up,
+                          new_achievements=new_achievements)
+
+@app.route('/game_over')
+@login_required
+def game_over():
+    return render_template('game_over.html',
+                           score=session.get('g_score', 0),
+                           level=session.get('g_level', 1),
+                           achievements=session.get('g_achievements', []))
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
