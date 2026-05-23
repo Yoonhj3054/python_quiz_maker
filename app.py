@@ -39,19 +39,39 @@ Q_BY_DIFF = {
     '최상': [q for q in ALL_QUESTIONS if q['difficulty'] == '최상']
 }
 
-def get_random_question_by_level(level):
-    if level <= 2:
-        pool = Q_BY_DIFF.get('초급', ALL_QUESTIONS)
-    elif level <= 4:
-        pool = Q_BY_DIFF.get('중급', ALL_QUESTIONS)
-    elif level <= 7:
-        pool = Q_BY_DIFF.get('고급', ALL_QUESTIONS)
-    else:
-        pool = Q_BY_DIFF.get('최상', ALL_QUESTIONS)
+def get_random_question_by_level(level, recent_topics=None):
+    if recent_topics is None:
+        recent_topics = []
         
-    if not pool:
-        pool = ALL_QUESTIONS
-    return random.choice(pool)
+    # Determine weights for [초급, 중급, 고급, 최상]
+    if level == 1:
+        weights = [80, 20, 0, 0]
+    elif level == 2:
+        weights = [50, 50, 0, 0]
+    elif level == 3:
+        weights = [20, 60, 20, 0]
+    elif level == 4:
+        weights = [10, 40, 50, 0]
+    elif level <= 6:
+        weights = [0, 20, 60, 20]
+    elif level <= 8:
+        weights = [0, 10, 40, 50]
+    else:
+        weights = [0, 0, 20, 80]
+        
+    diffs = ['초급', '중급', '고급', '최상']
+    chosen_diff = random.choices(diffs, weights=weights, k=1)[0]
+    
+    pool = Q_BY_DIFF.get(chosen_diff, ALL_QUESTIONS)
+    
+    # Filter out recently seen topics to force variety
+    filtered_pool = [q for q in pool if q['topic'] not in recent_topics]
+    
+    # If filtered is empty, fallback to full pool
+    if not filtered_pool:
+        filtered_pool = pool
+        
+    return random.choice(filtered_pool)
 
 DB_PATH = 'data/db.json'
 
@@ -326,9 +346,10 @@ def game_start():
     session['g_level'] = 1
     session['g_combo'] = 0
     session['g_achievements'] = []
+    session['g_recent_topics'] = []
     
     # Pick first random question based on Level 1
-    session['g_current_q_id'] = get_random_question_by_level(1)['id']
+    session['g_current_q_id'] = get_random_question_by_level(1, [])['id']
     
     return redirect('/game_active')
 
@@ -343,7 +364,7 @@ def game_active():
     
     # Bug Fix: If the cookie holds an old/deleted question ID, pick a new one
     if current_q is None:
-        current_q = get_random_question_by_level(session.get('g_level', 1))
+        current_q = get_random_question_by_level(session.get('g_level', 1), session.get('g_recent_topics', []))
         session['g_current_q_id'] = current_q['id']
     
     message = None
@@ -407,7 +428,13 @@ def game_active():
                     return redirect('/game_over')
             
             # Next question
-            next_q = get_random_question_by_level(session['g_level'])
+            recents = session.get('g_recent_topics', [])
+            recents.append(current_q['topic'])
+            if len(recents) > 3:
+                recents.pop(0)
+            session['g_recent_topics'] = recents
+            
+            next_q = get_random_question_by_level(session['g_level'], recents)
             session['g_current_q_id'] = next_q['id']
             current_q = next_q
             
