@@ -1,0 +1,154 @@
+# 이 셀을 실행하여 종합 퀴즈 게임을 시작하세요!
+import time
+
+class Styles:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    CYAN = '\033[96m'
+
+# [오류 해결] 따옴표와 괄호가 꼬여있던 문법 오류(SyntaxError)를 완벽하게 수정했습니다.
+def print_styled(text, style=""):
+    if style:
+        print(f"{style}{text}{Styles.ENDC}")
+    else:
+        print(text)
+
+QUIZ_DATA = [
+    {
+        "category": "변수와 자료형",
+        "question": "파이썬에서 변수명으로 사용할 수 없는 변수명은 무엇일까요?",
+        "options": ["my_value", "value_2", "2_value", "_value"],
+        "answer": 3,
+        "explanation": "파이썬 변수명은 숫자로 시작할 수 없습니다. 문자(a-z, A-Z)나 언더바(_)로 시작해야 합니다."
+    },
+    {
+        "category": "변수와 자료형",
+        "question": "다음 중 파이썬 코드 'type(3.14)'의 실행 결과로 올바른 타입은 무엇일까요?",
+        "options": ["int (정수형)", "float (실수형)", "str (문자열)", "bool (불리언)"],
+        "answer": 2,
+        "explanation": "3.14는 소수점이 있는 실수형(floating-point number)이므로 float 타입입니다."
+    },
+    {
+        "category": "변수와 자료형",
+        "question": "문자열 '10'을 정수형 10으로 변환하기 위해 사용해야 하는 내장 함수는 무엇일까요?",
+        "options": ["str()", "float()", "int()", "type()"],
+        "answer": 3,
+        "explanation": "int('10')을 실행하면 문자열 '10'이 정수형 숫자 10으로 변환됩니다."
+    },
+    {
+        "category": "연산자와 조건문",
+        "question": "파이썬에서 나눗셈의 '몫'만 구하고자 할 때 사용하는 연산자는 무엇일까요?",
+        "options": ["/ (나눗셈)", "% (나머지)", "// (몫)", "** (거듭제곱)"],
+        "answer": 3,
+        "explanation": "// 연산자는 나눗셈 결과의 소수점 이하를 버리고 몫(정수 부분)만 반환합니다. (예: 7 // 3 = 2)"
+    },
+    {
+        "category": "연산자와 조건문",
+        "question": "다음 조건식의 결과는 무엇일까요?\n>>> 10 > 5 and 3 == 4",
+        "options": ["True", "False", "Error", "None"],
+        "answer": 2,
+        "explanation": "10 > 5는 True이지만, 3 == 4는 False입니다. and 연산자는 양쪽이 모두 True여야 True를 반환하므로 결과는 False가 됩니다."
+    },
+    {
+        "category": "반복문",
+        "question": "range(1, 6)을 사용한 for 반복문은 몇 번 반복 실행될까요?",
+        "options": ["4번", "5번", "6번", "무한히 반복 실행"],
+        "answer": 2,
+        "explanation": "range(1, 6)은 1부터 5까지 총 5번의 숫자를 순회하며 실행됩니다."
+    },
+    {
+        "category": "반복문",
+        "question": "반복문 안에서 특정 조건일 때 반복문을 완전히 빠져나오기 위해 사용하는 키워드는 무엇일까요?",
+        "options": ["continue", "pass", "exit", "break"],
+        "answer": 4,
+        "explanation": "break 키워드는 실행 즉시 가장 가까운 부모 반복문을 즉시 중단하고 빠져나오도록 합니다."
+    },
+    {
+        "category": "리스트와 딕셔너리",
+        "question": "리스트 my_list = [10, 20, 30]에서 숫자 20을 꺼내기 위한 올바른 인덱싱 표현은 무엇일까요?",
+        "options": ["my_list[0]", "my_list[1]", "my_list[2]", "my_list[-3]"],
+        "answer": 2,
+        "explanation": "파이썬의 인덱스는 0부터 시작하므로 두 번째 원소 20의 인덱스는 1이 됩니다."
+    },
+    {
+        "category": "리스트와 딕셔너리",
+        "question": "딕셔너리 person = {'name': 'Alice', 'age': 25}에서 나이(25)를 조회하는 올바른 코드는 무엇일까요?",
+        "options": ["person[0]", "person['age']", "person.get(age)", "person.keys('age')"],
+        "answer": 2,
+        "explanation": "딕셔너리는 키(Key)를 활용해 대괄호 안에 조회하고 싶은 키 명칭 person['age']과 같이 입력해 값을 가져옵니다."
+    },
+    {
+        "category": "함수",
+        "question": "파이썬에서 함수를 정의할 때 사용하는 올바른 키워드는 무엇일까요?",
+        "options": ["function", "def", "func", "define"],
+        "answer": 2,
+        "explanation": "def는 'define'의 약자로, 파이썬에서 함수 선언 시 필수로 사용되는 약속된 키워드입니다."
+    }
+]
+
+score = 0
+total = len(QUIZ_DATA)
+
+print_styled("==================================================================", Styles.HEADER + Styles.BOLD)
+print_styled("  🏆 파이썬 기초 문법 종합 테스트 퀴즈를 시작합니다! 🏆", Styles.HEADER + Styles.BOLD)
+print_styled("==================================================================", Styles.HEADER + Styles.BOLD)
+print("질문을 꼼꼼히 읽고 정답 번호를 골라주세요.\n")
+time.sleep(0.5)
+
+for idx, q in enumerate(QUIZ_DATA, 1):
+    print("-" * 65)
+    print_styled(f"Q{idx}. [{q['category']}]", Styles.CYAN)
+    print_styled(q['question'], Styles.BOLD)
+    print()
+    for i, opt in enumerate(q['options'], 1):
+        print(f"  {i}) {opt}")
+    print()
+    
+    while True:
+        try:
+            ans_str = input(f"[Q{idx}] 정답 번호 입력 (1~4): ").strip()
+            if not ans_str:
+                continue
+            ans = int(ans_str)
+            if 1 <= ans <= 4:
+                break
+            print_styled("⚠️ 1번에서 4번 사이의 숫자를 입력해주세요.", Styles.WARNING)
+        except ValueError:
+            print_styled("⚠️ 숫자를 입력해주세요.", Styles.WARNING)
+        except EOFError:
+            print_styled("⚠️ 입력 스트림 오류가 발생했습니다. 다시 입력해주세요.", Styles.WARNING)
+            
+    print()
+    if ans == q['answer']:
+        print_styled("🎉 정답입니다! 대단하군요!", Styles.GREEN + Styles.BOLD)
+        score += 1
+    else:
+        print_styled("❌ 오답입니다! 아쉽네요.", Styles.FAIL + Styles.BOLD)
+        print_styled(f"  정답은 {q['answer']}번: {q['options'][q['answer']-1]} 입니다.", Styles.WARNING)
+        
+    print(f"\n💡 해설: {q['explanation']}")
+    print("-" * 65)
+    
+    # [코랩 먹통 방지] 엔터 대기용 input()을 과감히 제거하고 1.5초간 해설을 읽을 시간을 준 뒤 다음 문제로 자동 전환합니다.
+    time.sleep(1.5)
+
+print("\n" + "=" * 65)
+print_styled("🏁 퀴즈를 모두 완료하셨습니다! 🏁", Styles.HEADER + Styles.BOLD)
+print(f"정답 개수: {score} / {total}")
+score_pct = int((score / total) * 100)
+print(f"최종 점수: {score_pct}점")
+print("=" * 65)
+
+if score_pct == 100:
+    print_styled("🏅 완벽합니다! 파이썬 기초 문법 마스터로 임명합니다!", Styles.GREEN + Styles.BOLD)
+elif score_pct >= 80:
+    print_styled("🥈 훌륭해요! 대부분의 핵심 문법을 확실하게 이해하고 계십니다!", Styles.BLUE + Styles.BOLD)
+elif score_pct >= 50:
+    print_styled("🥉 조금만 더 연습하면 되겠어요! 헷갈린 부분을 다시 한 번 복습해 봅시다!", Styles.WARNING + Styles.BOLD)
+else:
+    print_styled("🌱 괜찮습니다! 코드를 여러 번 타이핑하고 연습하다 보면 금방 익숙해질 거예요. 다시 도전해 봐요!", Styles.CYAN + Styles.BOLD)
