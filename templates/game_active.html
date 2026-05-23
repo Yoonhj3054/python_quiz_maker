@@ -3,24 +3,39 @@
 {% block content %}
 <div class="game-container" style="position: relative; max-width: 1000px; margin: 0 auto; padding-top: 1rem;">
     
-    <!-- 우측 상단 큰 HUD (상태창) -->
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem;">
-        <div style="background: var(--bg-color); padding: 1.5rem 2.5rem; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); border: 2px solid var(--border-color); text-align: right; min-width: 250px;">
-            <div style="font-size: 2.2rem; color: #ff4757; margin-bottom: 10px;">
-                {% for _ in range(hp) %}❤️{% endfor %}
-                {% for _ in range(3 - hp) %}🖤{% endfor %}
-            </div>
-            <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 5px;">Lv.{{ level }}</div>
-            <div style="width: 100%; max-width: 250px; background: #dfe4ea; border-radius: 10px; height: 15px; overflow: hidden; margin-bottom: 5px; margin-left: auto;">
-                <div style="width: {{ (exp / max_exp) * 100 }}%; background: var(--primary-color); height: 100%; transition: width 0.3s;"></div>
-            </div>
-            <div style="font-size: 1rem; color: var(--text-color); margin-bottom: 10px;">{{ exp }} / {{ max_exp }} EXP</div>
-            <div style="font-size: 1.8rem; font-weight: bold; color: var(--primary-color);">점수: {{ score }}</div>
+    <!-- 상단 대시보드 타이틀 -->
+    <p style="color: var(--text-sub); font-size: 1rem; margin-bottom: 0.5rem;">👤 플레이어: {{ session.username }}</p>
+    <h1 style="font-size: 2.2rem; margin-bottom: 2rem;">🎯 파이썬 퀴즈 대시보드</h1>
+    
+    <!-- 2단 메트릭 박스 -->
+    <div style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="flex: 1; background: var(--bg-color); border: 2px solid var(--border-color); padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <p style="margin: 0; font-size: 1.1rem; color: var(--text-sub);">🏆 획득한 EXP / 점수</p>
+            <h2 style="margin: 0.5rem 0 0 0; color: var(--primary-color); font-size: 1.8rem;">{{ exp }} EXP / {{ score }}점</h2>
             {% if combo > 0 %}
-            <div style="font-size: 1.5rem; font-weight: bold; color: #ff7f50; animation: pulse 1s infinite; margin-top: 5px;">🔥 {{ combo }} 콤보!</div>
+                <p style="color: #ff7f50; margin: 5px 0 0 0; font-weight: bold; animation: pulse 1s infinite;">🔥 {{ combo }} 콤보 진행 중!</p>
             {% endif %}
         </div>
+        <div style="flex: 1; background: var(--bg-color); border: 2px solid var(--border-color); padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <p style="margin: 0; font-size: 1.1rem; color: var(--text-sub);">❤️ 남은 목숨</p>
+            <h2 style="margin: 0.5rem 0 0 0; color: #ff4757; font-size: 1.8rem;">
+                {% for _ in range(hp) %}❤️{% endfor %}{% for _ in range(3 - hp) %}🖤{% endfor %}
+            </h2>
+        </div>
     </div>
+    
+    <!-- 진행률 게이지바 -->
+    <div style="margin-bottom: 3rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: bold; color: var(--text-color);">
+            <span>📈 Lv.{{ level }} 퀴즈 진행률</span>
+            <span>{{ exp }} / {{ max_exp }} EXP</span>
+        </div>
+        <div style="width: 100%; background: var(--border-color); height: 12px; border-radius: 6px; overflow: hidden;">
+            <div style="width: {{ (exp / max_exp) * 100 }}%; background: var(--primary-color); height: 100%; transition: width 0.3s;"></div>
+        </div>
+    </div>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin-bottom: 2rem;">
 
     <!-- 메시지 및 업적 알림 -->
     {% if message %}
@@ -37,14 +52,12 @@
     {% endif %}
 
     <!-- 문제 및 선지 (중앙 정렬 및 크게) -->
-    <div class="card" style="padding: 4rem 2rem; text-align: center; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-        <div style="margin-bottom: 2rem;">
-            <span class="difficulty-badge {{ q.difficulty }}" style="font-size: 1.2rem; padding: 5px 15px;">{{ q.difficulty }}</span>
-            <span style="margin-left: 10px; font-weight: bold; color: var(--text-color); font-size: 1.2rem;">{{ q.topic }}</span>
-        </div>
-        
-        <div style="font-size: 2rem; font-weight: bold; margin-bottom: 2.5rem; word-break: keep-all; line-height: 1.4;">
-            {{ q.question }}
+    <div class="card" style="padding: 3rem 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center;">
+        <div style="margin-bottom: 2rem; text-align: left;">
+            <h3 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.3rem;">📝 파이썬 문제 <span class="difficulty-badge {{ q.difficulty }}" style="font-size: 0.9rem; padding: 3px 10px; margin-left: 10px;">{{ q.difficulty }}</span></h3>
+            <div style="font-size: 2rem; font-weight: bold; margin-bottom: 1.5rem; word-break: keep-all; line-height: 1.4; color: var(--text-color);">
+                {{ q.question }}
+            </div>
         </div>
 
         {% if q.codeSnippet %}
@@ -66,7 +79,7 @@
                 {% endfor %}
             </div>
             <div style="text-align: center; margin-top: 3rem;">
-                <button type="submit" class="btn" style="padding: 1.2rem 4rem; font-size: 1.5rem; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">정답 제출</button>
+                <button type="submit" class="btn" style="padding: 1.2rem 4rem; font-size: 1.5rem; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 100%; max-width: 600px;">정답 제출 📝</button>
             </div>
         </form>
     </div>

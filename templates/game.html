@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="card">
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <h1>🔥 서바이벌 게임 모드</h1>
-        <p>목숨 3개를 가지고 방대한 파이썬 문제에 도전하세요!</p>
-        <p>콤보를 이어가며 경험치를 쌓고 레벨을 올려 명예의 전당에 이름을 올리세요.</p>
-        <a href="/game_start" class="btn" style="margin-top: 1rem; font-size: 1.2rem; padding: 1rem 3rem;">게임 시작</a>
-    </div>
+<div class="card" style="text-align: center; padding: 4rem 2rem;">
+    <h1 style="font-size: 2.8rem; margin-bottom: 1rem;">🐍 파이썬 문법 마스터 퀴즈</h1>
+    <h3 style="color: var(--text-sub); font-weight: normal; margin-bottom: 0.5rem;">교수님 수업 자료를 기반으로 만든 퀴즈입니다.</h3>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">🏆 <strong>랭킹</strong>과 🌟 <strong>EXP(경험치)</strong> 시스템이 포함되어 있습니다!</p>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 2.5rem 0;">
+    
+    <a href="/game_start" class="btn" style="font-size: 1.5rem; padding: 1.2rem 4rem; width: 100%; max-width: 400px; display: inline-block;">게임 시작 🎮</a>
+</div>
 
     <h2>🏆 명예의 전당 (랭킹보드)</h2>
     {% if ranking %}

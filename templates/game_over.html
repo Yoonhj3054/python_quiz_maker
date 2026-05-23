@@ -2,13 +2,13 @@
 
 {% block content %}
 <div class="card" style="text-align: center; padding: 3rem;">
-    <h1 style="color: var(--primary-color); font-size: 3rem; margin-bottom: 1rem;">💀 게임 오버 💀</h1>
+    <h1 style="color: #ff4757; font-size: 3rem; margin-bottom: 1rem;">💀 게임 오버 💀</h1>
     
     <p style="font-size: 1.2rem; margin-bottom: 2rem;">수고하셨습니다! 귀하의 최종 기록입니다.</p>
 
-    <div style="background: var(--bg-color); padding: 2rem; border-radius: 10px; display: inline-block; text-align: left; margin-bottom: 2rem;">
-        <h2 style="margin-top: 0;">최종 점수: <span style="color: var(--primary-color);">{{ score }}점</span></h2>
-        <h2>도달 레벨: <span style="color: #ff7f50;">Lv.{{ level }}</span></h2>
+    <div style="background: var(--bg-color); padding: 2rem; border-radius: 10px; display: inline-block; text-align: left; margin-bottom: 2rem; border: 2px solid var(--border-color);">
+        <h2 style="margin-top: 0;">최종 누적 점수: <span style="color: var(--primary-color);">{{ score }}점</span></h2>
+        <h2 style="margin-bottom: 0;">도달 레벨: <span style="color: #ff7f50;">Lv.{{ level }}</span></h2>
         
         {% if achievements %}
         <h3 style="margin-top: 1.5rem;">🏆 달성한 업적</h3>
@@ -22,9 +22,9 @@
 
     <p style="font-weight: bold; color: var(--text-color);">귀하의 기록이 <a href="/game" style="color: var(--primary-color);">명예의 전당</a>에 등록되었습니다!</p>
 
-    <div style="margin-top: 2rem;">
-        <a href="/game_start" class="btn" style="padding: 1rem 2rem; font-size: 1.1rem; margin-right: 10px;">다시 도전하기</a>
-        <a href="/game" class="btn btn-outline" style="padding: 1rem 2rem; font-size: 1.1rem;">랭킹 확인하기</a>
+    <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem;">
+        <a href="/game_start" class="btn" style="padding: 1rem 2rem; font-size: 1.1rem; width: 100%; max-width: 200px;">다시 도전하기 🔄</a>
+        <a href="/game" class="btn btn-outline" style="padding: 1rem 2rem; font-size: 1.1rem; width: 100%; max-width: 200px;">처음으로 돌아가기 ↩️</a>
     </div>
 </div>
 {% endblock %}
