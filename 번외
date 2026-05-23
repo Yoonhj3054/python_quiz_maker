@@ -1,0 +1,96 @@
+# game_system.py
+
+# =========================
+# 게임 상태 저장 변수
+# =========================
+
+score = 0
+exp = 0
+level = 1
+combo = 0
+
+# 오답노트 저장용 리스트
+wrong_answers = []
+
+
+# =========================
+# 점수 추가 함수
+# =========================
+
+def add_score(current_score, amount=10):
+    current_score += amount
+    return current_score
+
+
+# =========================
+# 경험치 추가 함수
+# =========================
+
+def add_exp(current_exp, amount=20):
+    current_exp += amount
+    return current_exp
+
+
+# =========================
+# 레벨업 체크 함수
+# EXP 100마다 레벨업
+# =========================
+
+def check_level_up(current_exp, current_level):
+
+    # 레벨업 기준
+    required_exp = current_level * 100
+
+    if current_exp >= required_exp:
+        current_level += 1
+        return current_level, True
+
+    return current_level, False
+
+
+# =========================
+# 콤보 증가 함수
+# =========================
+
+def increase_combo(current_combo):
+    current_combo += 1
+    return current_combo
+
+
+# =========================
+# 콤보 초기화 함수
+# =========================
+
+def reset_combo():
+    return 0
+
+
+# =========================
+# 오답노트 저장 함수
+# =========================
+
+def add_wrong_answer(wrong_list, question, user_answer, correct_answer):
+
+    wrong_data = {
+        "question": question,
+        "user_answer": user_answer,
+        "correct_answer": correct_answer
+    }
+
+    wrong_list.append(wrong_data)
+
+    return wrong_list
+
+
+# =========================
+# 게임 상태 출력 함수
+# =========================
+
+def show_status(score, exp, level, combo):
+
+    print("===== GAME STATUS =====")
+    print(f"점수 : {score}")
+    print(f"EXP : {exp}")
+    print(f"레벨 : {level}")
+    print(f"콤보 : {combo}")
+    print("=======================")
