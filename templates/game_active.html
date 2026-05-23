@@ -56,14 +56,8 @@
         <form method="POST" action="/game_active">
             <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
                 {% for option in q.options %}
-                <label style="width: 100%; max-width: 600px; padding: 1.5rem 2rem; font-size: 1.5rem; border: 3px solid var(--border-color); border-radius: 15px; cursor: pointer; transition: all 0.2s; background: var(--bg-color); color: var(--text-color); font-weight: bold;" 
-                       onmouseover="this.style.borderColor='var(--primary-color)';" 
-                       onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='var(--border-color)';">
-                    <input type="radio" name="option" value="{{ loop.index0 }}" required style="display: none;" onchange="
-                        let labels = this.closest('form').querySelectorAll('label');
-                        labels.forEach(l => l.style.borderColor = 'var(--border-color)');
-                        this.closest('label').style.borderColor = 'var(--primary-color)';
-                    ">
+                <label class="game-option" onclick="selectOption(this)">
+                    <input type="radio" name="option" value="{{ loop.index0 }}" required style="display: none;">
                     <span>{{ option }}</span>
                 </label>
                 {% endfor %}
@@ -81,5 +75,41 @@
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
+
+.game-option {
+    width: 100%; 
+    max-width: 600px; 
+    padding: 1.5rem 2rem; 
+    font-size: 1.5rem; 
+    border: 3px solid var(--border-color); 
+    border-radius: 15px; 
+    cursor: pointer; 
+    transition: all 0.2s; 
+    background: var(--bg-color); 
+    color: var(--text-color); 
+    font-weight: bold;
+    display: block;
+}
+
+.game-option:hover {
+    border-color: var(--primary-color);
+}
 </style>
+
+<script>
+function selectOption(selectedLabel) {
+    // Reset all labels
+    const labels = document.querySelectorAll('.game-option');
+    labels.forEach(lbl => {
+        lbl.style.backgroundColor = 'var(--bg-color)';
+        lbl.style.color = 'var(--text-color)';
+        lbl.style.borderColor = 'var(--border-color)';
+    });
+    
+    // Highlight selected label
+    selectedLabel.style.backgroundColor = 'var(--primary-color)';
+    selectedLabel.style.color = 'white';
+    selectedLabel.style.borderColor = 'var(--primary-color)';
+}
+</script>
 {% endblock %}
