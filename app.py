@@ -285,11 +285,8 @@ def game_start():
     session['g_combo'] = 0
     session['g_achievements'] = []
     
-    # Pick random question pool for survival (endless until HP=0)
-    pool = [q['id'] for q in ALL_QUESTIONS]
-    random.shuffle(pool)
-    session['g_pool'] = pool
-    session['g_idx'] = 0
+    # Pick first random question
+    session['g_current_q_id'] = random.choice(ALL_QUESTIONS)['id']
     
     return redirect('/game_active')
 
@@ -299,8 +296,7 @@ def game_active():
     if 'g_hp' not in session or session['g_hp'] <= 0:
         return redirect('/game')
         
-    idx = session['g_idx']
-    q_id = session['g_pool'][idx]
+    q_id = session.get('g_current_q_id')
     current_q = Q_DICT.get(q_id)
     
     message = None
@@ -362,15 +358,9 @@ def game_active():
                     return redirect('/game_over')
             
             # Next question
-            session['g_idx'] += 1
-            if session['g_idx'] >= len(session['g_pool']):
-                pool = [q['id'] for q in ALL_QUESTIONS]
-                random.shuffle(pool)
-                session['g_pool'] = pool
-                session['g_idx'] = 0
-            
-            idx = session['g_idx']
-            current_q = Q_DICT.get(session['g_pool'][idx])
+            next_q = random.choice(ALL_QUESTIONS)
+            session['g_current_q_id'] = next_q['id']
+            current_q = next_q
             
     return render_template('game_active.html', 
                           q=current_q, 
