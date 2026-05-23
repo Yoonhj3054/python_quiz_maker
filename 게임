@@ -1,0 +1,208 @@
+# game_system.py
+
+# =========================================
+# 게임 시스템
+# =========================================
+
+# 플레이어 정보
+score = 0
+exp = 0
+level = 1
+combo = 0
+hp = 3
+
+# 업적 저장
+achievements = []
+
+# 오답노트 저장
+wrong_answers = []
+
+# 랭킹 시스템
+ranking_board = []
+
+
+# =========================================
+# 점수 추가
+# =========================================
+
+def add_score(current_score, amount=10):
+
+    current_score += amount
+
+    return current_score
+
+
+# =========================================
+# EXP 추가
+# =========================================
+
+def add_exp(current_exp, amount=20):
+
+    current_exp += amount
+
+    return current_exp
+
+
+# =========================================
+# 레벨업 체크
+# =========================================
+
+def check_level_up(current_exp, current_level):
+
+    required_exp = current_level * 100
+
+    if current_exp >= required_exp:
+
+        current_level += 1
+
+        return current_level, True
+
+    return current_level, False
+
+
+# =========================================
+# 콤보 증가
+# =========================================
+
+def increase_combo(current_combo):
+
+    current_combo += 1
+
+    return current_combo
+
+
+# =========================================
+# 콤보 초기화
+# =========================================
+
+def reset_combo():
+
+    return 0
+
+
+# =========================================
+# HP 감소
+# =========================================
+
+def decrease_hp(current_hp):
+
+    current_hp -= 1
+
+    return current_hp
+
+
+# =========================================
+# 오답노트 저장
+# =========================================
+
+def add_wrong_answer(
+    wrong_list,
+    question,
+    user_answer,
+    correct_answer
+):
+
+    wrong_data = {
+
+        "question": question,
+        "user_answer": user_answer,
+        "correct_answer": correct_answer
+
+    }
+
+    wrong_list.append(wrong_data)
+
+    return wrong_list
+
+
+# =========================================
+# 업적 체크
+# =========================================
+
+def check_achievement(combo, level, achievements):
+
+    # 첫 콤보 업적
+    if combo == 3 and "콤보 초보자" not in achievements:
+
+        achievements.append("콤보 초보자")
+
+        print("🏆 업적 달성: 콤보 초보자")
+
+
+    # 레벨 업적
+    if level == 5 and "Python 견습생" not in achievements:
+
+        achievements.append("Python 견습생")
+
+        print("🏆 업적 달성: Python 견습생")
+
+
+    return achievements
+
+
+# =========================================
+# 경쟁 시스템 (랭킹)
+# =========================================
+
+def add_ranking(ranking_board, player_name, score):
+
+    player_data = {
+
+        "name": player_name,
+        "score": score
+
+    }
+
+    ranking_board.append(player_data)
+
+    # 점수 기준 정렬
+    ranking_board.sort(
+        key=lambda x: x["score"],
+        reverse=True
+    )
+
+    return ranking_board
+
+
+# =========================================
+# 랭킹 출력
+# =========================================
+
+def show_ranking(ranking_board):
+
+    print("\n===== RANKING =====")
+
+    rank = 1
+
+    for player in ranking_board:
+
+        print(
+            f"{rank}위 - "
+            f"{player['name']} : "
+            f"{player['score']}점"
+        )
+
+        rank += 1
+
+
+# =========================================
+# 상태 출력
+# =========================================
+
+def show_status(
+    score,
+    exp,
+    level,
+    combo,
+    hp
+):
+
+    print("\n===== PLAYER STATUS =====")
+
+    print(f"점수 : {score}")
+    print(f"EXP : {exp}")
+    print(f"레벨 : {level}")
+    print(f"콤보 : {combo}")
+    print(f"HP : {hp}")
+
+    print("=========================")
